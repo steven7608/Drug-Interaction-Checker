@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Account</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="container">
+  <h2>Create Account</h2>
+  <form id="registerForm">
+    <label for="name">Full Name:</label>
+    <input type="text" id="name" required>
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" required>
+
+    <label for="password">Password:</label>
+    <input type="password" id="password" required>
+
+    <label for="role">Role:</label>
+    <select id="role">
+      <option value="patient">Patient</option>
+      <option value="doctor">Doctor</option>
+    </select>
+
+    <button type="submit">Register</button>
+  </form>
+  <p>Already have an account?</p>
+  <button onclick="window.location.href='index.html'">Back to Login</button>
+</div>
+
+<script src="js/register.js"></script>
+</body>
+</html>
