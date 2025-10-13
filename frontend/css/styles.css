@@ -1,44 +1,68 @@
-/* ==== Global Reset ==== */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap');
+
+/* Global Reset */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: "Inter", Arial, sans-serif;
+    font-family: "IBM Plex Mono", monospace;
+    color: #000;
 }
 
-/* ==== Page Layout ==== */
+/* Page Layout */
 body {
-    background: linear-gradient(135deg, #4c9aff, #6c63ff);
+    background: #fff;
     min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    margin: 0;
 }
 
-/* ==== Container Card ==== */
+/* Container Card */
 .container {
     background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    width: 90%;
-    max-width: 420px;
-    padding: 2.5rem;
-    text-align: center;
+    border-radius: 0;
+    box-shadow: none;
+    width: 100%;
+    max-width: none;
+    padding: 16px;
+    text-align: left;
+    color: #000;
 }
 
-/* ==== Headings ==== */
+.topbar {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 12px 16px;
+    background: #fff;
+    border-bottom: 1px solid #000;
+}
+
+.topbar .role { color: #000; }
+
+.page {
+    padding: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Headings */
 h1, h2 {
-    color: #333;
+    color: #e2e2e2;
     margin-bottom: 1rem;
 }
 
-/* ==== Paragraphs ==== */
+h3 { margin: 0 0 0.75rem 0; }
+
+/* Paragraphs */
 p {
-    color: #555;
+    color: #c0c6cd;
     margin: 0.75rem 0 1.25rem 0;
 }
 
-/* ==== Form Styling ==== */
+/* Form Styling */
 form {
     display: flex;
     flex-direction: column;
@@ -48,50 +72,92 @@ form {
 
 label {
     font-weight: 600;
-    color: #444;
+    color: #e2e2e2;
 }
 
 input, select {
     padding: 0.7rem;
-    border: 1.5px solid #ccc;
-    border-radius: 8px;
+    border: 1.5px solid #000;
+    border-radius: 0;
     font-size: 1rem;
     transition: 0.2s;
+    background: #fff;
+    color: #000;
 }
 
 input:focus, select:focus {
-    border-color: #6c63ff;
+    border-color: #000;
     outline: none;
 }
 
-/* ==== Buttons ==== */
+/* Buttons */
 button {
-    background-color: #6c63ff;
-    color: white;
-    border: none;
+    background-color: #fff;
+    color: #000;
+    border: 1px solid #000;
     padding: 0.8rem 1.2rem;
-    border-radius: 8px;
+    border-radius: 0;
     font-weight: 600;
     cursor: pointer;
     transition: 0.2s;
 }
 
 button:hover {
-    background-color: #4c9aff;
+    background-color: #f2f2f2;
 }
 
-/* ==== Secondary Buttons ==== */
+/* Secondary Buttons */
 button.secondary {
-    background-color: #f3f3f3;
-    color: #333;
-    border: 1px solid #ccc;
+    background-color: #fff;
+    color: #000;
+    border: 1px solid #000;
 }
 
 button.secondary:hover {
-    background-color: #e0e0e0;
+    background-color: #f2f2f2;
 }
 
-/* ==== Responsive ==== */
+/* Special style for Logout button */
+.logout-btn {
+    background: #000;
+    color: #fff;
+    border: 1px solid #000;
+}
+.logout-btn:hover { background: #111; }
+
+/* Panels, Lists, Grid */
+.panel {
+    border: 1px solid #000;
+    padding: 12px;
+    border-radius: 0;
+    background: #fff;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.list { list-style: none; padding: 0; margin: 0; }
+.list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px dashed #000;
+}
+.list li:last-child { border-bottom: none; }
+
+.row { margin: 8px 0; }
+.muted { color: #444; font-size: 12px; }
+
+.rx-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.card { border: 1px solid #000; background: #fff; padding: 12px; }
+
+.small-btn { padding: 0.25rem 0.5rem; font-size: 0.85rem; }
+
+/* Responsive */
 @media (max-width: 480px) {
     .container {
         padding: 1.5rem;
@@ -100,4 +166,5 @@ button.secondary:hover {
     h1, h2 {
         font-size: 1.4rem;
     }
+    .grid { grid-template-columns: 1fr; }
 }

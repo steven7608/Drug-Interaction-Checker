@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Signing you in…</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>body { font-family: sans-serif; }</style>
+  </head>
+<body>
+<div class="container">
+  <h2>Finishing sign-in…</h2>
+  <p>Please wait, redirecting.</p>
+</div>
+
+<script src="js/supabase.js"></script>
+<script>
+(function handleCallback() {
+  // Supabase sends tokens in the URL hash fragment: #access_token=...&refresh_token=...
+  const hash = window.location.hash.startsWith('#') ? window.location.hash.substring(1) : '';
+  const params = new URLSearchParams(hash);
+  const accessToken = params.get('access_token');
+  const refreshToken = params.get('refresh_token');
+  const tokenType = params.get('token_type');
+  const type = params.get('type');
+
+  if (!accessToken) {
+    // If no tokens, go back to login
+    window.location.replace('home.html');
+    return;
+  }
+
+  // Save tokens so the app is logged in
+  saveSession({ access_token: accessToken, refresh_token: refreshToken, token_type: tokenType, type }, null);
+
+  // Ensure a profile exists: use pending cache or create minimal profile
+  try {
+    const payload = decodeJwt(accessToken) || {};
+    const email = payload.email || null;
+
+    const pending = localStorage.getItem('pendingProfile');
+    let profile = pending ? JSON.parse(pending) : null;
+    if (!profile) {
+      // create minimal profile if none was cached
+      profile = {
+        userid: generateUserId(),
+        email: email,
+        fullname: email || 'New User',
+        phonenumber: null,
+        role: 'patient'
+      };
+    }
+
+    // Upsert-like behavior: if a row with same email exists, skip insert
+    const existing = await supabaseRequest({
+      method: 'GET',
+      path: 'user_accounts',
+      accessToken,
+      query: `?select=id,userid,email&email=eq.${encodeURIComponent(profile.email)}`
+    });
+
+    if (!existing || existing.length === 0) {
+      await supabaseRequest({
+        method: 'POST',
+        path: 'user_accounts',
+        body: [profile],
+        accessToken
+      });
+    }
+    localStorage.removeItem('pendingProfile');
+  } catch (e) {
+    // continue regardless
+  }
+
+  // Redirect by role when possible
+  try {
+    const users = await supabaseRequest({ method: 'GET', path: 'user_accounts', accessToken, query: '?select=role,fullname&order=id.asc&limit=1' });
+    const role = (users && users[0] && users[0].role) || 'patient';
+    window.location.replace(role === 'doctor' ? 'doctor.html' : 'patient.html');
+  } catch (e) {
+    window.location.replace('patient.html');
+  }
+})();
+</script>
+</body>
+</html>
+
+

@@ -15,6 +15,12 @@
     <label for="email">Email:</label>
     <input type="email" id="email" required>
 
+    <label for="userId">User ID (unique):</label>
+    <input type="text" id="userId" required>
+
+    <label for="phoneNumber">Phone Number:</label>
+    <input type="tel" id="phoneNumber" placeholder="555-555-5555">
+
     <label for="password">Password:</label>
     <input type="password" id="password" required>
 
@@ -27,9 +33,10 @@
     <button type="submit">Register</button>
   </form>
   <p>Already have an account?</p>
-  <button onclick="window.location.href='index.html'">Back to Login</button>
+  <button onclick="window.location.href='home.html'">Back to Login</button>
 </div>
 
+<script src="js/supabase.js"></script>
 <script src="js/register.js"></script>
 </body>
 </html>

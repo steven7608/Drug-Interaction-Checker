@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Patient Portal</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="role" id="headerRole"></div>
+  <button id="logoutBtn" class="logout-btn">Logout</button>
+</div>
+<div class="page">
+  <div class="panel">
+    <div id="doctorInfo">Not assigned</div>
+  </div>
+  <div class="panel">
+    <h3>Your Medications</h3>
+    <ul id="rxList" class="list"></ul>
+  </div>
+</div>
+
+<script src="js/supabase.js"></script>
+<script src="js/patient.js"></script>
+</body>
+</html>
+
+
