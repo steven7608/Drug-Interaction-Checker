@@ -168,3 +168,34 @@ button.secondary:hover {
     }
     .grid { grid-template-columns: 1fr; }
 }
+
+/* Interaction Checker Box */
+.interaction-panel {
+  margin-top: 10px;
+  padding: 10px;
+  max-width: 100%;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+/* Individual interaction items */
+.interaction-item {
+  border-bottom: 1px dashed #999;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+/* Show More button */
+.toggle-btn {
+  margin-top: 5px;
+  padding: 4px 8px;
+  background: #fff;
+  border: 1px solid #000;
+  cursor: pointer;
+}
+
+.toggle-btn:hover {
+  background: #eaeaea;
+}
+
+

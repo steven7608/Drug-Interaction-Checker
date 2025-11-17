@@ -48,6 +48,32 @@ async function init() {
     li.appendChild(notes);
     rxList.appendChild(li);
   });
+
+  // Questionnaire submission logic
+  const questionnaireForm = document.getElementById("questionnaireForm");
+  questionnaireForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+  const token = getAccessToken();
+  const answers = {
+    allergies: document.getElementById("q_allergies").value.trim(),
+    symptoms: document.getElementById("q_symptoms").value.trim(),
+    otc: document.getElementById("q_otc").value.trim()
+  };
+
+  await supabaseRequest({
+    method: "POST",
+    path: "questionnaire_responses",
+    accessToken: token,
+    body: [{
+      patient_userid: me.userid,
+      answers: answers
+    }]
+  });
+
+  alert("Your responses have been submitted.");
+  questionnaireForm.reset();
+  });
 }
 
 

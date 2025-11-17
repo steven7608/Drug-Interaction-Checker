@@ -14,10 +14,30 @@
   <div class="panel">
     <div id="doctorInfo">Not assigned</div>
   </div>
+
+  <!-- Medications Panel -->
   <div class="panel">
     <h3>Your Medications</h3>
     <ul id="rxList" class="list"></ul>
   </div>
+
+  <!-- Questionnaire Panel -->
+  <div class="panel">
+    <h3>Health Questionnaire</h3>
+    <form id="questionnaireForm">
+      <label>Do you have any allergies?</label>
+      <input type="text" id="q_allergies">
+
+      <label>Current symptoms:</label>
+      <input type="text" id="q_symptoms">
+
+      <label>Are you currently taking any OTC medications?</label>
+      <input type="text" id="q_otc">
+
+      <button type="submit">Submit Questionnaire</button>
+    </form>
+  </div>
+
 </div>
 
 <script src="js/supabase.js"></script>

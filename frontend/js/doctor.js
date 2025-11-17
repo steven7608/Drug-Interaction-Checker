@@ -1,3 +1,26 @@
+// Utility to truncate long text for drug interactions display
+function truncate(text, maxLength = 150) {
+  if (!text) return "";
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength) + "...";
+}
+
+function toggleInteraction(btn) {
+  const container = btn.closest(".interaction-item");
+  const shortText = container.querySelector(".short-text");
+  const fullText = container.querySelector(".full-text");
+
+  if (fullText.style.display === "none") {
+    fullText.style.display = "inline";
+    shortText.style.display = "none";
+    btn.textContent = "Show Less";
+  } else {
+    fullText.style.display = "none";
+    shortText.style.display = "inline";
+    btn.textContent = "Show More";
+  }
+}
+
 const logoutBtn = document.getElementById('logoutBtn');
 const headerRole = document.getElementById('headerRole');
 const unassignedList = document.getElementById('unassignedList');
@@ -48,6 +71,10 @@ async function init() {
 
   // Show only two columns initially (details panel remains but shows helper text)
   await refreshLists();
+
+  // Interaction Checker Button
+  document.getElementById("interactionBtn").addEventListener("click", handleInteractionCheck);
+
 }
 
 async function refreshLists() {
@@ -133,6 +160,7 @@ async function openPatient(patient) {
   document.getElementById('prescriptionForm').style.display = 'block';
   await loadNotes();
   await loadPrescriptions();
+  await loadQuestionnaires();
   try { detailsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (_) {}
 }
 
@@ -221,4 +249,117 @@ async function onSavePrescription() {
   await loadPrescriptions();
 }
 
+/* Load Questionnaire Responses */
+async function loadQuestionnaires() {
+  const token = getAccessToken();
 
+  const results = await supabaseRequest({
+    method: "GET",
+    path: "questionnaire_responses",
+    accessToken: token,
+    query: `?select=answers,created_at&patient_userid=eq.${encodeURIComponent(selectedPatient.userid)}&order=created_at.desc`
+  });
+
+  const qList = document.getElementById("questionnaireList");
+  qList.innerHTML = "";
+
+  results.forEach(r => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <div><strong>${new Date(r.created_at).toLocaleString()}</strong></div>
+      <div>Allergies: ${r.answers.allergies || "N/A"}</div>
+      <div>Symptoms: ${r.answers.symptoms || "N/A"}</div>
+      <div>OTC meds: ${r.answers.otc || "N/A"}</div>
+    `;
+    qList.appendChild(li);
+  });
+}
+
+
+// ===== FDA Interaction Checker =====
+
+async function handleInteractionCheck() {
+  const meds = document.getElementById("interactionInput").value.trim();
+  const resultsDiv = document.getElementById("interactionResults");
+
+  if (!meds) {
+    resultsDiv.innerHTML = "<p>Please enter medications.</p>";
+    return;
+  }
+
+  resultsDiv.innerHTML = "<p>Checking...</p>";
+
+  const data = await checkFDAInteractions(meds);
+
+  let html = "<h4>Detected Interactions</h4>";
+
+  if (data.interactionPairs.length === 0) {
+    resultsDiv.innerHTML = "<p>No cross-interactions detected.</p>";
+    return;
+  }
+
+  data.interactionPairs.forEach(pair => {
+    const shortText = truncate(pair.text, 150);
+    const fullText = pair.text.replace(/\n/g, "<br>");
+
+    html += `
+      <div class="interaction-item">
+        <p>
+          <strong>${pair.from} ↔ ${pair.to}:</strong>
+          <span class="short-text">${shortText}</span>
+          <span class="full-text" style="display:none;">${fullText}</span>
+        </p>
+
+        <button class="toggle-btn" onclick="toggleInteraction(this)">
+          Show More
+        </button>
+      </div>
+    `;
+  });
+
+  resultsDiv.innerHTML = html;
+}
+
+async function checkFDAInteractions(meds) {
+  const list = meds.split(",").map(x => x.trim());
+
+  const results = {};
+  const pairs = [];
+
+  for (const med of list) {
+    const url = `https://api.fda.gov/drug/label.json?search=openfda.generic_name:"${med.toUpperCase()}"&limit=3`;
+
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (!data.results) {
+        results[med] = { error: "No data found" };
+        continue;
+      }
+
+      const info = data.results[0];
+      results[med] = {
+        interactions: info.drug_interactions || [],
+      };
+
+    } catch (err) {
+      results[med] = { error: err.message };
+    }
+  }
+
+  for (const m1 of list) {
+    for (const m2 of list) {
+      if (m1 === m2) continue;
+      const texts = results[m1]?.interactions || [];
+
+      texts.forEach(txt => {
+        if (txt.toLowerCase().includes(m2.toLowerCase())) {
+          pairs.push({ from: m1, to: m2, text: txt });
+        }
+      });
+    }
+  }
+
+  return { results, interactionPairs: pairs };
+}
