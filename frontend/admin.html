@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="role" id="headerRole"></div>
+  <button id="logoutBtn" class="logout-btn">Logout</button>
+  <button onclick="window.location.href='home.html'">Home</button>
+  <button onclick="window.location.href='patient.html'">Patient</button>
+  <button onclick="window.location.href='doctor.html'">Doctor</button>
+</div>
+
+<div class="page">
+  <h2>Admin Portal</h2>
+  <div class="grid" id="overviewSection">
+    <div class="panel">
+      <h3>All Accounts</h3>
+      <div class="row"><input type="text" id="patientSearch" placeholder="Search by name, email or userid"></div>
+      <ul id="myPatientsList" class="list"></ul>
+    </div>
+  </div>
+
+  <div class="panel" id="detailsPanel" style="display:none;">
+    <h3 id="detailTitle">Account Details</h3>
+    <div id="patientDetails" class="muted">Select an account to view details.</div>
+    <div class="row">
+      <label>Role</label>
+      <select id="adminRoleSelect">
+        <option value="patient">patient</option>
+        <option value="doctor">doctor</option>
+        <option value="administrator">administrator</option>
+      </select>
+      <button id="saveRoleBtn">Save Role</button>
+    </div>
+    <div class="row">
+      <button id="deleteAccountBtn" class="secondary">Delete Account</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/supabase.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>
+
+
