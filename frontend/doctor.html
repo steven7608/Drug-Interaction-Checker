@@ -10,82 +10,105 @@
   <div class="role" id="headerRole"></div>
   <button id="logoutBtn" class="logout-btn">Logout</button>
 </div>
+
 <div class="page">
   <h2>Doctor Portal</h2>
+
+  <!-- Overview: Unassigned + My Patients -->
   <div class="grid" id="overviewSection">
     <div class="panel">
       <h3>Unassigned Patients</h3>
       <ul id="unassignedList" class="list"></ul>
     </div>
+
     <div class="panel">
       <h3>My Patients</h3>
-      <div class="row"><input type="text" id="patientSearch" placeholder="Search by name or email"></div>
+      <div class="row">
+        <input type="text" id="patientSearch" placeholder="Search by name or email">
+      </div>
       <ul id="myPatientsList" class="list"></ul>
     </div>
   </div>
 
+  <!-- Patient Details -->
   <div class="panel" id="detailsPanel" style="display:none;">
     <h3 id="detailTitle">Patient Details</h3>
-    <div id="patientDetails" class="muted">Select a patient to view notes and medications.</div>
+    <div id="patientDetails" class="muted">
+      Select a patient to view notes and medications.
+    </div>
 
+    <!-- Current Medications -->
     <div class="row">
       <h3>Current Medications</h3>
       <ul id="rxList" class="list"></ul>
     </div>
 
+    <!-- Add Medication -->
     <div class="row">
       <div class="panel" id="prescriptionForm" style="display:none;">
         <h3>Add Medication</h3>
+
         <div class="row">
           <label>Medication</label>
-          <select id="rxMedication"></select>
+          <!-- TEXT INPUT instead of dropdown -->
+          <input type="text" id="rxMedicationName" placeholder="Enter medication name">
         </div>
+
         <div class="row">
           <label>Dosage (mg)</label>
           <input type="number" id="rxDosage" min="0" step="1">
         </div>
+
         <div class="row">
           <label>Form</label>
           <input type="text" id="rxForm" placeholder="tablet, capsule, etc.">
         </div>
+
         <div class="row">
           <label>Notes</label>
           <input type="text" id="rxNotes" placeholder="instructions">
         </div>
+
         <div class="row">
           <label>Start</label>
           <input type="date" id="rxStart">
         </div>
+
         <div class="row">
           <label>End</label>
           <input type="date" id="rxEnd">
         </div>
+
         <div class="row">
           <button id="rxSave">Prescribe</button>
         </div>
       </div>
     </div>
 
+    <!-- Notes (with delete) -->
     <div class="row">
       <h3>Notes</h3>
       <ul id="notesList" class="list"></ul>
       <div class="row">
-        <input type="text" id="newNote" placeholder="Add a note"> <button id="addNoteBtn">Add</button>
+        <input type="text" id="newNote" placeholder="Add a note">
+        <button id="addNoteBtn">Add</button>
       </div>
     </div>
+
     <!-- Questionnaire Responses -->
     <div class="row">
       <h3>Questionnaire Responses</h3>
       <ul id="questionnaireList" class="list"></ul>
     </div>
-        <!-- FDA DRUG INTERACTION CHECKER -->
+
+    <!-- FDA Drug Interaction Checker -->
     <div class="row">
       <h3>Drug Interaction Checker</h3>
-
-      <input type="text" id="interactionInput" placeholder="Enter medications, e.g., ibuprofen, warfarin">
+      <input type="text" id="interactionInput"
+             placeholder="Enter medications, e.g., ibuprofen, warfarin">
       <button id="interactionBtn">Check Interactions</button>
 
-      <div id="interactionResults" class="panel" style="margin-top: 10px;"></div>
+      <div id="interactionResults" class="panel" style="margin-top:10px;"></div>
     </div>
   </div>
 </div>
@@ -94,5 +117,3 @@
 <script src="js/doctor.js"></script>
 </body>
 </html>
-
-
