@@ -198,4 +198,17 @@ button.secondary:hover {
   background: #eaeaea;
 }
 
+.warning-card {
+  border-left: 4px solid #d97757;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  background: #fff7ed;
+  border-radius: 6px;
+}
+
+.tiny-muted {
+  font-size: 0.8rem;
+  opacity: 0.7;
+  margin-top: 8px;
+}
 
