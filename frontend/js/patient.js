@@ -1,22 +1,151 @@
-const logoutBtn   = document.getElementById('logoutBtn');
-const headerRole  = document.getElementById('headerRole');
-const doctorInfo  = document.getElementById('doctorInfo');
-const rxList      = document.getElementById('rxList');
-
-console.log("patient.js loaded");
+const logoutBtn  = document.getElementById('logoutBtn');
+const headerRole = document.getElementById('headerRole');
+const doctorInfo = document.getElementById('doctorInfo');
+const rxList     = document.getElementById('rxList');
 
 init();
 
-// ===== Patient-facing medication interaction warnings (hybrid using openFDA) =====
+async function init() {
+  const token = getAccessToken();
+  const email = getEmail();
+  if (!token || !email) {
+    window.location.href = 'home.html';
+    return;
+  }
+
+  logoutBtn.addEventListener('click', () => {
+    clearSession();
+    window.location.href = 'home.html';
+  });
+
+  // Resolve current user
+  const users = await supabaseRequest({
+    method: 'GET',
+    path: 'user_accounts',
+    accessToken: token,
+    query: `?select=userid,fullname,role&email=eq.${encodeURIComponent(email)}`
+  });
+  if (!users || users.length === 0) {
+    alert('No profile');
+    return;
+  }
+  const me = users[0];
+  headerRole.textContent = `Patient: ${me.fullname || email}`;
+
+  // Medication Safety Warnings based on patient's prescriptions
+  await loadPatientInteractionWarnings(me.userid);
+
+  // Doctor assignment
+  const assigns = await supabaseRequest({
+    method: 'GET',
+    path: 'patient_doctor_assignments',
+    accessToken: token,
+    query: `?select=doctor_userid,patient_userid&patient_userid=eq.${encodeURIComponent(me.userid)}`
+  });
+  if (assigns && assigns.length > 0) {
+    const docId = assigns[0].doctor_userid;
+    const docs = await supabaseRequest({
+      method: 'GET',
+      path: 'user_accounts',
+      accessToken: token,
+      query: `?select=fullname,email&userid=eq.${encodeURIComponent(docId)}`
+    });
+    if (docs && docs[0]) {
+      doctorInfo.textContent = `Doctor: ${docs[0].fullname || docs[0].email}`;
+    } else {
+      doctorInfo.textContent = 'Doctor: Unknown';
+    }
+  } else {
+    doctorInfo.textContent = 'Doctor: Not assigned';
+  }
+
+  // Prescriptions list
+  const meds = await supabaseRequest({
+    method: 'GET',
+    path: 'medications',
+    accessToken: token,
+    query: '?select=id,name'
+  });
+  const medsById = {};
+  (meds || []).forEach(m => { medsById[m.id] = m.name; });
+
+  const rx = await supabaseRequest({
+    method: 'GET',
+    path: 'user_medications',
+    accessToken: token,
+    query: `?select=medicationid,dosage_mg,form,notes,start_date,end_date&userid=eq.${encodeURIComponent(me.userid)}&order=id.desc`
+  });
+
+  rxList.innerHTML = '';
+  (rx || []).forEach(r => {
+    const li = document.createElement('li');
+    const name = medsById[r.medicationid] || `#${r.medicationid}`;
+
+    const title = document.createElement('div');
+    title.style.fontWeight = '600';
+    title.textContent = name;
+
+    // Multi-line meta
+    const parts = [
+      r.dosage_mg ? `${r.dosage_mg}mg` : null,
+      r.form,
+      r.start_date ? `start ${r.start_date}` : null,
+      r.end_date ? `end ${r.end_date}` : null
+    ].filter(Boolean);
+
+    const notes = document.createElement('div');
+    notes.style.opacity = '0.85';
+    notes.textContent = r.notes ? r.notes : '';
+
+    li.appendChild(title);
+    parts.forEach(line => {
+      const d = document.createElement('div');
+      d.textContent = line;
+      li.appendChild(d);
+    });
+    li.appendChild(notes);
+    rxList.appendChild(li);
+  });
+
+  // Questionnaire submission logic
+  const questionnaireForm = document.getElementById("questionnaireForm");
+  if (questionnaireForm) {
+    questionnaireForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const token2 = getAccessToken();
+      const answers = {
+        allergies: document.getElementById("q_allergies").value.trim(),
+        symptoms: document.getElementById("q_symptoms").value.trim(),
+        otc: document.getElementById("q_otc").value.trim()
+      };
+
+      await supabaseRequest({
+        method: "POST",
+        path: "questionnaire_responses",
+        accessToken: token2,
+        body: [{
+          patient_userid: me.userid,
+          answers: answers
+        }]
+      });
+
+      alert("Your responses have been submitted.");
+      questionnaireForm.reset();
+    });
+  }
+}
+
+/* ===== Medication Safety Warnings  ===== */
 
 // Summarize the long FDA label text into a short patient-friendly warning
 function summarizeInteractionText(raw, medName) {
   if (!raw) return null;
 
-  const textLower = raw.toLowerCase();
+  const textLower    = raw.toLowerCase();
   const medNameLower = (medName || "").toLowerCase();
 
-  // --- Opioid-specific safety (Option C) ---
+  // --- Opioid-specific safety ---
   const OPIOID_KEYWORDS = [
     "hydrocodone", "oxycodone", "morphine", "codeine",
     "fentanyl", "hydromorphone", "oxymorphone",
@@ -156,17 +285,11 @@ async function checkFDAInteractionsForPatient(meds) {
   return { results };
 }
 
-
 // Main entry point for patient safety warnings
 async function loadPatientInteractionWarnings(patientUserId) {
-  console.log("loadPatientInteractionWarnings called for", patientUserId);
-
   const token = getAccessToken();
   const safetyDiv = document.getElementById("safetyWarnings");
-  if (!safetyDiv) {
-    console.warn("No #safetyWarnings element found in DOM");
-    return;
-  }
+  if (!safetyDiv) return;
 
   safetyDiv.textContent = "Checking your medications for important safety warnings...";
 
@@ -194,8 +317,6 @@ async function loadPatientInteractionWarnings(patientUserId) {
   const medNames = (userMeds || [])
     .map(r => medicationsById[r.medicationid])
     .filter(Boolean);
-
-  console.log("Patient med names for safety check:", medNames);
 
   if (medNames.length === 0) {
     safetyDiv.textContent = "You currently have no medications on file.";
@@ -254,168 +375,4 @@ async function loadPatientInteractionWarnings(patientUserId) {
       </p>
     `;
   }
-}
-
-// ===== Main init =====
-
-async function init() {
-  console.log("init() starting in patient.js");
-
-  const token = getAccessToken();
-  const email = getEmail();
-  if (!token || !email) {
-    window.location.href = 'home.html';
-    return;
-  }
-
-  // Robust logout handler
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-      try {
-        clearSession();   // defined in supabase.js
-      } catch (e) {
-        console.warn("clearSession failed or not defined:", e);
-      }
-      window.location.href = 'home.html';
-    });
-  }
-
-  // Resolve current user
-  const users = await supabaseRequest({
-    method: 'GET',
-    path: 'user_accounts',
-    accessToken: token,
-    query: `?select=userid,fullname,role&email=eq.${encodeURIComponent(email)}`
-  });
-  if (!users || users.length === 0) {
-    alert('No profile');
-    return;
-  }
-
-  const me = users[0];
-  console.log("Current patient:", me);
-  if (headerRole) {
-    headerRole.textContent = `Patient: ${me.fullname || email}`;
-  }
-
-  // Load patient-facing interaction warnings based on their prescriptions
-  try {
-    await loadPatientInteractionWarnings(me.userid);
-  } catch (e) {
-    console.error("Error in loadPatientInteractionWarnings:", e);
-  }
-
-  // Doctor assignment
-  try {
-    const assigns = await supabaseRequest({
-      method: 'GET',
-      path: 'patient_doctor_assignments',
-      accessToken: token,
-      query: `?select=doctor_userid,patient_userid&patient_userid=eq.${encodeURIComponent(me.userid)}`
-    });
-
-    console.log("Doctor assignments for this patient:", assigns);
-
-    if (assigns && assigns.length > 0) {
-      const docId = assigns[0].doctor_userid;
-      const docs = await supabaseRequest({
-        method: 'GET',
-        path: 'user_accounts',
-        accessToken: token,
-        query: `?select=fullname,email&userid=eq.${encodeURIComponent(docId)}`
-      });
-
-      if (docs && docs[0]) {
-        doctorInfo.textContent = `Doctor: ${docs[0].fullname || docs[0].email}`;
-      } else {
-        doctorInfo.textContent = 'Doctor: Unknown';
-      }
-    } else {
-      doctorInfo.textContent = 'Doctor: Not assigned';
-    }
-  } catch (e) {
-    console.error("Error loading doctor assignment:", e);
-    doctorInfo.textContent = 'Doctor: Not assigned';
-  }
-
-  // Prescriptions list
-  try {
-    const meds = await supabaseRequest({
-      method: 'GET',
-      path: 'medications',
-      accessToken: token,
-      query: '?select=id,name'
-    });
-    const medsById = {};
-    (meds || []).forEach(m => { medsById[m.id] = m.name; });
-
-    const rx = await supabaseRequest({
-      method: 'GET',
-      path: 'user_medications',
-      accessToken: token,
-      query: `?select=medicationid,dosage_mg,form,notes,start_date,end_date&userid=eq.${encodeURIComponent(me.userid)}&order=id.desc`
-    });
-
-    rxList.innerHTML = '';
-    (rx || []).forEach(r => {
-      const li = document.createElement('li');
-      const name = medsById[r.medicationid] || `#${r.medicationid}`;
-
-      const title = document.createElement('div');
-      title.style.fontWeight = '600';
-      title.textContent = name;
-
-      const parts = [
-        r.dosage_mg ? `${r.dosage_mg}mg` : null,
-        r.form,
-        r.start_date ? `start ${r.start_date}` : null,
-        r.end_date ? `end ${r.end_date}` : null
-      ].filter(Boolean);
-
-      const notes = document.createElement('div');
-      notes.style.opacity = '0.85';
-      notes.textContent = r.notes ? r.notes : '';
-
-      li.appendChild(title);
-      parts.forEach(line => {
-        const d = document.createElement('div');
-        d.textContent = line;
-        li.appendChild(d);
-      });
-      li.appendChild(notes);
-      rxList.appendChild(li);
-    });
-  } catch (e) {
-    console.error("Error loading prescriptions:", e);
-  }
-
-  // Questionnaire submission logic
-  const questionnaireForm = document.getElementById("questionnaireForm");
-  if (questionnaireForm) {
-    questionnaireForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const token2 = getAccessToken();
-      const answers = {
-        allergies: document.getElementById("q_allergies").value.trim(),
-        symptoms: document.getElementById("q_symptoms").value.trim(),
-        otc: document.getElementById("q_otc").value.trim()
-      };
-
-      await supabaseRequest({
-        method: "POST",
-        path: "questionnaire_responses",
-        accessToken: token2,
-        body: [{
-          patient_userid: me.userid,
-          answers: answers
-        }]
-      });
-
-      alert("Your responses have been submitted.");
-      questionnaireForm.reset();
-    });
-  }
-
-  console.log("init() finished in patient.js");
 }
