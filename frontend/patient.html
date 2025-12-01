@@ -29,7 +29,44 @@
     <ul id="rxList" class="list"></ul>
   </div>
 
-  <!-- Sprint 3, Steven An -->
+  <!-- Reminders Panel -->
+<div class="panel">
+  <h3>Your Medication Reminders</h3>
+
+  <ul id="reminderList" class="list"></ul>
+
+  <h4>Add Reminder</h4>
+  <form id="reminderForm">
+
+    <label>Medication</label>
+    <input type="text" id="rem_medication" placeholder="Metformin 500mg" required>
+
+    <label>Frequency</label>
+    <select id="rem_frequency">
+      <option value="once_daily">Once Daily</option>
+      <option value="twice_daily">Twice Daily</option>
+      <option value="three_times_daily">Three Times Daily</option>
+      <option value="every_8_hours">Every 8 Hours</option>
+      <option value="weekly">Weekly</option>
+    </select>
+
+    <label>Times (comma-separated, 24hr)</label>
+    <input type="text" id="rem_times" placeholder="08:00, 20:00">
+
+    <label>With Meal?</label>
+    <select id="rem_with_meal">
+      <option value="false">No</option>
+      <option value="true">Yes</option>
+    </select>
+
+    <label>Notes</label>
+    <input type="text" id="rem_notes" placeholder="Optional">
+
+    <button type="submit">Add Reminder</button>
+  </form>
+</div>
+
+
   <!-- Questionnaire Panel -->
   <div class="panel">
     <h3>Health Questionnaire</h3>
