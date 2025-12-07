@@ -32,6 +32,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
 
         // Redirect to appropriate home page based on role
         const role = (users && users[0] && users[0].role) || 'patient';
+        try { localStorage.setItem('sbRole', role); } catch (_) {}
         if (role === 'doctor') {
             window.location.href = "doctor.html";
         }else if (role === 'administrator') {
@@ -44,4 +45,28 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     }
 });
 
+
+// Redirect to appropritae role page if curr logged in using access token
+(async function redirectIfLoggedIn() {
+    try {
+        const token = getAccessToken?.();
+        const email = getEmail?.();
+        if (!token || !email) return;
+
+        const users = await supabaseRequest({
+            method: "GET",
+            path: "user_accounts",
+            accessToken: token,
+            query: `?select=role,email&email=eq.${encodeURIComponent(email)}&limit=1`
+        });
+
+        const role = (users && users[0] && users[0].role) || "patient";
+        try { localStorage.setItem('sbRole', role); } catch (_) {}
+        window.location.href =
+            role === "doctor" ? "doctor.html" :
+            role === "administrator" ? "admin.html" :
+            "patient.html";
+    } catch (_) {
+    }
+})();
 

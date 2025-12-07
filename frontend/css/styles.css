@@ -212,3 +212,16 @@ button.secondary:hover {
   margin-top: 8px;
 }
 
+/* Home/Logo button in top left */
+.app-logo {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    width: 36px;
+    height: 36px;
+    z-index: 1000;
+    cursor: pointer;
+    user-select: none;
+    object-fit: contain;
+}
+

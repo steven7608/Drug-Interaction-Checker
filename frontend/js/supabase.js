@@ -72,6 +72,7 @@ function clearSession() {
     localStorage.removeItem("sbAccessToken");
     localStorage.removeItem("sbRefreshToken");
     localStorage.removeItem("sbEmail");
+    try { localStorage.removeItem("sbRole"); } catch (_) {}
 }
 
 // Lightweight JWT (JSON web token) decoder (no validation, just base64 decode)
