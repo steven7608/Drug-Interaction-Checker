@@ -30,10 +30,13 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
             } catch (_) {  }
         }
 
+        // Redirect to appropriate home page based on role
         const role = (users && users[0] && users[0].role) || 'patient';
         if (role === 'doctor') {
             window.location.href = "doctor.html";
-        } else {
+        }else if (role === 'administrator') {
+            window.location.href = "admin.html";
+        }  else {
             window.location.href = "patient.html";
         }
     } catch (err) {

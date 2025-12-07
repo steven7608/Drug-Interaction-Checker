@@ -1,5 +1,8 @@
-// Simple Supabase REST/AUTH helper (no external libs)
-// Configure with your project settings
+//  Everett Miceli
+// Supabase authentication, token, and accessing functions
+// Authentication settings (RLS, email confirmation, ect) handled within Supabase
+// Anon key used for client side operations, use service key for future addition of back-end operations
+
 const supabaseUrl = "https://zsghiwxyahwsogcmouny.supabase.co";
 const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzZ2hpd3h5YWh3c29nY21vdW55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4NTMxNjksImV4cCI6MjA3NTQyOTE2OX0.3BpLsHGkPDV2cLCWhtUpGaKOJB-1Y0mxRaD5yO4P-Cs";
 
@@ -25,7 +28,7 @@ function supabaseAuthSignIn(email, password) {
     }).then(r => r.json());
 }
 
-function supabaseRequest({ method = "GET", path, body = undefined, accessToken = undefined, query = "" }) {
+function supabaseRequest({method = "GET", path, body = undefined, accessToken = undefined, query = ""}) {
     const headers = {
         "apikey": supabaseAnonKey,
         "Accept": "application/json",
@@ -71,7 +74,8 @@ function clearSession() {
     localStorage.removeItem("sbEmail");
 }
 
-// Lightweight JWT decoder (no validation, just base64 decode)
+// Lightweight JWT (JSON web token) decoder (no validation, just base64 decode)
+// Extract user info from token, not used for auth
 function decodeJwt(token) {
     try {
         const parts = token.split('.');

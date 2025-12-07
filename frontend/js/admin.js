@@ -1,4 +1,5 @@
-//admin page logic modeled after doctor.js but simplified
+//Everett Miceli
+// Admin page modified from doctor.js
 const logoutBtn = document.getElementById('logoutBtn');
 const headerRole = document.getElementById('headerRole');
 const myPatientsList = document.getElementById('myPatientsList');
@@ -10,7 +11,7 @@ const adminRoleSelect = document.getElementById('adminRoleSelect');
 const saveRoleBtn = document.getElementById('saveRoleBtn');
 const deleteAccountBtn = document.getElementById('deleteAccountBtn');
 
-let selectedPatient = null;
+let selectedAccount = null;
 
 init();
 
@@ -24,7 +25,7 @@ async function init() {
   saveRoleBtn.addEventListener('click', onSaveRole);
   deleteAccountBtn.addEventListener('click', onDeleteAccount);
 
-  //gate: admin only
+  // Admin only, deny access to those without admin role
   const rows = await supabaseRequest({ method: 'GET', path: 'user_accounts', accessToken: token, query: `?select=userid,fullname,role&email=eq.${encodeURIComponent(email)}` });
   if (!rows || rows.length === 0) { alert('No profile found'); return; }
   const me = rows[0];
@@ -69,7 +70,7 @@ function clearDetails() {
 }
 
 function openPatient(patient) {
-  selectedPatient = patient;
+  selectedAccount = patient;
   document.getElementById('overviewSection').style.display = 'none';
   detailsPanel.style.display = 'block';
   detailTitle.textContent = `Account — ${(patient.fullname || patient.email || patient.userid)}`;
@@ -80,23 +81,23 @@ function openPatient(patient) {
 }
 
 async function onSaveRole() {
-  if (!selectedPatient) return;
+  if (!selectedAccount) return;
   const token = getAccessToken();
   const newRole = adminRoleSelect.value;
-  await supabaseRequest({ method: 'PATCH', path: 'user_accounts', accessToken: token, query: `?userid=eq.${encodeURIComponent(selectedPatient.userid)}`, body: { role: newRole } });
+  await supabaseRequest({ method: 'PATCH', path: 'user_accounts', accessToken: token, query: `?userid=eq.${encodeURIComponent(selectedAccount.userid)}`, body: { role: newRole } });
   await refreshLists();
 }
 
 async function onDeleteAccount() {
-  if (!selectedPatient) return;
-  await deleteAccount(selectedPatient.userid);
+  if (!selectedAccount) return;
+  await deleteAccount(selectedAccount.userid);
 }
 
 async function deleteAccount(userid) {
   const token = getAccessToken();
   if (!confirm(`Delete account ${userid}? This cannot be undone.`)) return;
   await supabaseRequest({ method: 'DELETE', path: 'user_accounts', accessToken: token, query: `?userid=eq.${encodeURIComponent(userid)}` });
-  selectedPatient = null;
+  selectedAccount = null;
   clearDetails();
   document.getElementById('overviewSection').style.display = 'grid';
   await refreshLists();

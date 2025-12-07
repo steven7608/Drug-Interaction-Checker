@@ -1,3 +1,7 @@
+//  Everett Miceli
+// Supabase utilized for registration. Email confirmation can be disabled via Supabase
+// Supabase user/registration handled within "Authentication" table. Seperate table needed for rest of operations (user_accounts) in Table Editor
+
 document.getElementById("registerForm").addEventListener("submit", async (e) => {
     e.preventDefault();
 
