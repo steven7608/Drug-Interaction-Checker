@@ -52,13 +52,20 @@ function renderMyPatientsFiltered() {
   myPatientsList.innerHTML = '';
   list.forEach(p => {
     const li = document.createElement('li');
+    li.style.justifyContent = 'flex-start';
+    li.style.gap = '8px';
     const label = document.createElement('span');
     label.textContent = `${p.fullname || p.email} (${p.role || 'patient'})`;
     const open = document.createElement('button'); open.textContent = 'View'; open.addEventListener('click', () => openPatient(p));
-    const remove = document.createElement('button'); remove.textContent = 'Delete'; remove.className = 'small-btn'; remove.addEventListener('click', () => deleteAccount(p.userid));
+    const remove = document.createElement('button'); remove.textContent = 'Delete'; remove.className = 'small-btn danger-btn'; remove.addEventListener('click', () => deleteAccount(p.userid));
     li.appendChild(label);
-    li.appendChild(open);
-    li.appendChild(remove);
+    const actions = document.createElement('div');
+    actions.style.marginLeft = 'auto';
+    actions.style.display = 'flex';
+    actions.style.gap = '8px'; 
+    actions.appendChild(open);  
+    actions.appendChild(remove);
+    li.appendChild(actions);
     myPatientsList.appendChild(li);
   });
 }

@@ -33,6 +33,7 @@ body {
     top: 0;
     width: 100%;
     display: flex;
+    align-items: center;
     justify-content: flex-end;
     gap: 12px;
     padding: 12px 16px;
@@ -225,3 +226,24 @@ button.secondary:hover {
     object-fit: contain;
 }
 
+#patientSearch { width: 100%; }
+
+/* Delete Button for Admin Page (in individual accountview) */
+#deleteAccountBtn {
+    background: #fff;
+    color: #b00020; 
+    border-color: #b00020; 
+}
+#deleteAccountBtn:hover {
+    background: #ff6e6e;
+}
+
+/* Delete button for Admin List */
+.danger-btn {
+    background: #fff;
+    color: #b00020;
+    border-color: #b00020;
+}
+.danger-btn:hover {
+    background: #ff6e6e;
+}
