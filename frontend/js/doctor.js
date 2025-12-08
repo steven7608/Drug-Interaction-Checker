@@ -8,7 +8,7 @@
 */
 
 // Sprint 2, Steven An
-// --------- Helpers for FDA interaction UI ----------
+// Helpers functions for FDA interaction UI 
 function truncate(text, maxLength = 150) {
   if (!text) return "";
   if (text.length <= maxLength) return text;
@@ -31,7 +31,7 @@ function toggleInteraction(btn) {
   }
 }
 
-// --------- DOM elements ----------
+//  DOM elements 
 const logoutBtn       = document.getElementById("logoutBtn");
 const headerRole      = document.getElementById("headerRole");
 const unassignedList  = document.getElementById("unassignedList");
@@ -64,7 +64,7 @@ let selectedPatient = null;
 let myPatients      = [];
 let medicationsById = {};
 
-// --------- Init ----------
+//  Init 
 init();
 
 async function init() {
@@ -133,7 +133,7 @@ async function init() {
   await refreshLists();
 }
 
-// --------- Patient list / assignments ----------
+//  Patient list / assignments 
 async function refreshLists() {
   const token = getAccessToken();
 
@@ -255,7 +255,7 @@ async function unassignPatient(patientUserId) {
   await refreshLists();
 }
 
-// --------- Patient details ----------
+//  Patient details 
 function clearDetails() {
   if (detailTitle) {
     detailTitle.textContent = "Patient Details";
@@ -299,7 +299,8 @@ async function openPatient(patient) {
   } catch (_) {}
 }
 
-// --------- Notes (with delete) ----------
+// Sprint 2, Steven An
+//  Notes (with delete) 
 async function loadNotes() {
   if (!notesList || !selectedPatient) return;
   notesList.innerHTML = "";
@@ -399,7 +400,8 @@ async function onAddNote() {
   await loadNotes();
 }
 
-// --------- Prescriptions (free-text medication name) ----------
+// Sprint 2, Steven An
+//  Prescriptions (free-text medication name) 
 async function loadPrescriptions() {
   if (!rxList || !selectedPatient) return;
   rxList.innerHTML = "";
@@ -581,7 +583,7 @@ async function handleInteractionCheck() {
 
   const data = await checkFDAInteractions(meds);
 
-  // ---------- Single-drug behavior (now with fallback to warnings) ----------
+  // Single-drug behavior (now with fallback to warnings) 
   if (list.length === 1) {
     const medName = list[0];
     const info = data.results && data.results[medName];
@@ -620,7 +622,7 @@ async function handleInteractionCheck() {
     return; // don't run multi-drug logic
   }
 
-  // ---------- Existing multi-drug behavior ----------
+  // Existing multi-drug behavior 
   if (!data.interactionPairs.length) {
     resultsDiv.innerHTML = "<p>No cross-interactions detected.</p>";
     return;
@@ -647,6 +649,8 @@ async function handleInteractionCheck() {
   resultsDiv.innerHTML = html;
 }
 
+// Sprint 2, Steven An
+// FDA Drug Interaction Checker 
 async function checkFDAInteractions(meds) {
   const list = meds.split(",").map(x => x.trim()).filter(Boolean);
   const results = {};
