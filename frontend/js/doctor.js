@@ -1,3 +1,12 @@
+/*
+  doctor.js     Virginia Tech      Sprint 1,2,3
+  Doctor portal, this file handle all doctor-related frontend logic and UI
+
+  Allows doctors to assign patients, view patient details, add notes, and prescribe medications.
+  Also includes FDA drug interaction checking functionality (making sure two drugs do not have harmful interactions), 
+  and questionnaire response viewing
+*/
+
 // Sprint 2, Steven An
 // --------- Helpers for FDA interaction UI ----------
 function truncate(text, maxLength = 150) {

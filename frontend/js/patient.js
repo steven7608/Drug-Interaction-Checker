@@ -1,3 +1,11 @@
+/*
+  patient.js     Virginia Tech      Sprint 1,2,3
+  Patient portal, this file handles all patient-related frontend logic and UI
+
+  Allows patients to view their assigned doctor, see their prescriptions, and submit questionnaires.
+  Also includes medication safety warning logic based on FDA data.
+*/
+
 const logoutBtn  = document.getElementById('logoutBtn');
 const headerRole = document.getElementById('headerRole');
 const doctorInfo = document.getElementById('doctorInfo');
@@ -137,9 +145,9 @@ async function init() {
   }
 }
 
-/* ===== Medication Safety Warnings    ===== */
 // Sprint 3,Steven An 
 // Summarize the long FDA label text into a short patient-friendly warning
+/* ===== Medication Safety Warnings    ===== */
 function summarizeInteractionText(raw, medName) {
   if (!raw) return null;
 
@@ -288,7 +296,7 @@ async function checkFDAInteractionsForPatient(meds) {
 }
 
 // Sprint 3, Steven An
-// Main entry point for patient safety warnings
+// Main entry point for patient safety warnings based on FDA data
 async function loadPatientInteractionWarnings(patientUserId) {
   const token = getAccessToken();
   const safetyDiv = document.getElementById("safetyWarnings");
