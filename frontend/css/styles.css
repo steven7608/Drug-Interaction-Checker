@@ -176,6 +176,7 @@ button.secondary:hover {
     .grid { grid-template-columns: 1fr; }
 }
 
+/* Sprint 2, Steven An */
 /* Interaction Checker Box */
 .interaction-panel {
   margin-top: 10px;
@@ -185,6 +186,7 @@ button.secondary:hover {
   white-space: normal;
 }
 
+/* Sprint 3, Steven An */
 /* Individual interaction items */
 .interaction-item {
   border-bottom: 1px dashed #999;
@@ -192,6 +194,7 @@ button.secondary:hover {
   margin-bottom: 10px;
 }
 
+/* Sprint 2, Steven An */
 /* Show More button */
 .toggle-btn {
   margin-top: 5px;
