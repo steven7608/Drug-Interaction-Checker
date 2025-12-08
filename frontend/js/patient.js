@@ -107,6 +107,7 @@ async function init() {
     rxList.appendChild(li);
   });
 
+  // Sprint 3, Steven An
   // Questionnaire submission logic
   const questionnaireForm = document.getElementById("questionnaireForm");
   if (questionnaireForm) {
@@ -136,8 +137,8 @@ async function init() {
   }
 }
 
-/* ===== Medication Safety Warnings  ===== */
-
+/* ===== Medication Safety Warnings    ===== */
+// Sprint 3,Steven An 
 // Summarize the long FDA label text into a short patient-friendly warning
 function summarizeInteractionText(raw, medName) {
   if (!raw) return null;
@@ -145,7 +146,7 @@ function summarizeInteractionText(raw, medName) {
   const textLower    = raw.toLowerCase();
   const medNameLower = (medName || "").toLowerCase();
 
-  // --- Opioid-specific safety ---
+  // Opioid-specific safety
   const OPIOID_KEYWORDS = [
     "hydrocodone", "oxycodone", "morphine", "codeine",
     "fentanyl", "hydromorphone", "oxymorphone",
@@ -163,7 +164,7 @@ function summarizeInteractionText(raw, medName) {
     };
   }
 
-  // --- High-priority interaction concepts from FDA text ---
+  // High-priority interaction concepts from FDA text
 
   if (textLower.includes("alcohol") || textLower.includes("ethanol")) {
     return {
@@ -206,7 +207,7 @@ function summarizeInteractionText(raw, medName) {
     };
   }
 
-  // --- Fallback: compress the first sentence of whatever FDA said ---
+  // Fallback: compress the first sentence of whatever FDA said 
   const firstSentence = raw.split(/[\.\n]/)[0];
   const cleaned = firstSentence.replace(/\s+/g, " ").trim();
   if (!cleaned) return null;
@@ -221,6 +222,7 @@ function summarizeInteractionText(raw, medName) {
   };
 }
 
+// Sprint 3, Steven An 
 // Call openFDA for the patient's meds and collect relevant label text per med
 async function checkFDAInteractionsForPatient(meds) {
   const list = meds.split(",").map(x => x.trim()).filter(Boolean);
@@ -285,6 +287,7 @@ async function checkFDAInteractionsForPatient(meds) {
   return { results };
 }
 
+// Sprint 3, Steven An
 // Main entry point for patient safety warnings
 async function loadPatientInteractionWarnings(patientUserId) {
   const token = getAccessToken();
@@ -293,7 +296,7 @@ async function loadPatientInteractionWarnings(patientUserId) {
 
   safetyDiv.textContent = "Checking your medications for important safety warnings...";
 
-  // 1) All medications (id -> name)
+  // All medications (id -> name)
   const medRows = await supabaseRequest({
     method: "GET",
     path: "medications",
@@ -306,7 +309,7 @@ async function loadPatientInteractionWarnings(patientUserId) {
     medicationsById[m.id] = m.name;
   });
 
-  // 2) This patient's prescriptions
+  // This patient's prescriptions
   const userMeds = await supabaseRequest({
     method: "GET",
     path: "user_medications",
@@ -323,7 +326,7 @@ async function loadPatientInteractionWarnings(patientUserId) {
     return;
   }
 
-  // 3) Call openFDA once we know all med names
+  // Call openFDA once we know all med names
   let data;
   try {
     data = await checkFDAInteractionsForPatient(medNames.join(", "));
@@ -339,7 +342,7 @@ async function loadPatientInteractionWarnings(patientUserId) {
   const seen = new Set();
   const warnings = [];
 
-  // 4) For EACH medication, for EACH relevant text block, summarize it
+  // For each medication, for each relevant text block, summarize it
   Object.entries(data.results || {}).forEach(([medName, info]) => {
     (info.texts || []).forEach(txt => {
       const summary = summarizeInteractionText(txt, medName);
@@ -353,7 +356,7 @@ async function loadPatientInteractionWarnings(patientUserId) {
     });
   });
 
-  // 5) Render warnings
+  // Render warnings
   if (warnings.length === 0) {
     safetyDiv.innerHTML = `
       <p>No special interaction warnings were flagged based on your current medications.</p>

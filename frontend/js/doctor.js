@@ -1,3 +1,4 @@
+// Sprint 2, Steven An
 // --------- Helpers for FDA interaction UI ----------
 function truncate(text, maxLength = 150) {
   if (!text) return "";
@@ -524,6 +525,7 @@ async function onSavePrescription() {
   await loadPrescriptions();
 }
 
+// Sprint 3, Steven An
 // --------- Questionnaire responses ----------
 async function loadQuestionnaires() {
   if (!selectedPatient) return;
@@ -552,6 +554,8 @@ async function loadQuestionnaires() {
   });
 }
 
+// Sprint 2, Steven An
+// Allows Doctor to check for drug interactions using FDA API
 // --------- FDA Drug Interaction Checker ----------
 async function handleInteractionCheck() {
   const medsInput = document.getElementById("interactionInput");
