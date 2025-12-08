@@ -555,13 +555,11 @@ async function loadQuestionnaires() {
 }
 
 // Sprint 2, Steven An
-// Allows Doctor to check for drug interactions using FDA API
+// Allows Doctor to check for drug interactions using openFDA API
 // --------- FDA Drug Interaction Checker ----------
 async function handleInteractionCheck() {
-  const medsInput = document.getElementById("interactionInput");
+  const medsInput  = document.getElementById("interactionInput");
   const resultsDiv = document.getElementById("interactionResults");
-
-  if (!medsInput || !resultsDiv) return;
 
   const meds = medsInput.value.trim();
   if (!meds) {
@@ -569,10 +567,51 @@ async function handleInteractionCheck() {
     return;
   }
 
+  const list = meds.split(",").map(x => x.trim()).filter(Boolean);
   resultsDiv.innerHTML = "<p>Checking...</p>";
 
   const data = await checkFDAInteractions(meds);
 
+  // ---------- Single-drug behavior (now with fallback to warnings) ----------
+  if (list.length === 1) {
+    const medName = list[0];
+    const info = data.results && data.results[medName];
+
+    const interactions  = (info && info.interactions)   || [];
+    const fallbackTexts = (info && info.fallbackTexts)  || [];
+
+    // Prefer drug_interactions if present; otherwise use fallback warning text
+    let labelTexts = interactions.length ? interactions : fallbackTexts;
+
+    if (!labelTexts.length) {
+      resultsDiv.innerHTML = `
+        <p>No interaction or warning information was found in the FDA label fields we checked for this medication.</p>
+      `;
+      return;
+    }
+
+    let html = `<h4>FDA label information for ${medName}</h4>`;
+
+    labelTexts.forEach(txt => {
+      const shortText = truncate(txt, 150);
+      const fullText  = txt.replace(/\n/g, "<br>");
+
+      html += `
+        <div class="interaction-item">
+          <p>
+            <span class="short-text">${shortText}</span>
+            <span class="full-text" style="display:none;">${fullText}</span>
+          </p>
+          <button class="toggle-btn" onclick="toggleInteraction(this)">Show More</button>
+        </div>
+      `;
+    });
+
+    resultsDiv.innerHTML = html;
+    return; // don't run multi-drug logic
+  }
+
+  // ---------- Existing multi-drug behavior ----------
   if (!data.interactionPairs.length) {
     resultsDiv.innerHTML = "<p>No cross-interactions detected.</p>";
     return;
@@ -611,20 +650,47 @@ async function checkFDAInteractions(meds) {
       const res = await fetch(url);
       const data = await res.json();
 
-      if (!data.results) {
-        results[med] = { error: "No data found" };
+      if (!data.results || !data.results[0]) {
+        results[med] = { error: "No data found", interactions: [], fallbackTexts: [] };
         continue;
       }
 
       const info = data.results[0];
+
+      // Primary interaction field (what you were using before)
+      const interactions = info.drug_interactions || [];
+
+      // Fallback: pull extra warning-related fields if needed
+      const fallbackTexts = [];
+      function addField(fieldName) {
+        const val = info[fieldName];
+        if (!val) return;
+        if (Array.isArray(val)) {
+          val.forEach(v => {
+            if (typeof v === "string") fallbackTexts.push(v);
+          });
+        } else if (typeof val === "string") {
+          fallbackTexts.push(val);
+        }
+      }
+
+      // These are common places where ibuprofen / NSAID warnings live
+      addField("warnings_and_cautions");
+      addField("warnings");
+      addField("boxed_warning");
+      addField("precautions");
+      addField("contraindications");
+
       results[med] = {
-        interactions: info.drug_interactions || []
+        interactions: interactions,
+        fallbackTexts: fallbackTexts
       };
     } catch (err) {
-      results[med] = { error: err.message };
+      results[med] = { error: err.message, interactions: [], fallbackTexts: [] };
     }
   }
 
+  // Build interaction pairs (unchanged logic)
   for (const m1 of list) {
     for (const m2 of list) {
       if (m1 === m2) continue;
