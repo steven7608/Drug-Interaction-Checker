@@ -252,3 +252,22 @@ button.secondary:hover {
 .remove-btn:hover {
     background: #ff6e6e;
 }
+
+/* Alignment changes for doctor page medication fields */
+#prescriptionForm .row > label {
+    display: inline-block;
+    min-width: 120px;
+}
+#prescriptionForm .row > input,
+#prescriptionForm .row > select {
+    margin-left: 12px;
+}
+#rxMedicationName {
+    width: 520px; 
+    max-width: 95%;
+}
+#interactionInput {
+    width: 420px; 
+    max-width: 95%;
+    margin-right: 12px;
+}

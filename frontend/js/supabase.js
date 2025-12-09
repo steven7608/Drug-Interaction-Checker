@@ -34,7 +34,11 @@ function supabaseRequest({method = "GET", path, body = undefined, accessToken = 
         "Accept": "application/json",
     };
     if (accessToken) headers["Authorization"] = `Bearer ${accessToken}`;
-    if (body !== undefined) headers["Content-Type"] = "application/json";
+    if (body !== undefined) {
+        headers["Content-Type"] = "application/json";
+        // return immediately after insert, fix to first click error when adding medication
+        headers["Prefer"] = "return=representation";
+    }
 
     const url = `${supabaseUrl}/rest/v1/${path}${query}`;
     return fetch(url, {

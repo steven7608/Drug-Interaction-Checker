@@ -200,7 +200,7 @@ function renderMyPatientsFiltered() {
     viewBtn.addEventListener("click", () => openPatient(p));
 
     const removeBtn = document.createElement("button");
-    removeBtn.className = "small-btn remove-btn";
+    removeBtn.className = "small-btn";
     removeBtn.textContent = "Remove";
     removeBtn.addEventListener("click", () => unassignPatient(p.userid));
 
@@ -432,7 +432,7 @@ async function loadPrescriptions() {
     }
 
     const removeBtn = document.createElement("button");
-    removeBtn.className = "small-btn remove-btn";
+    removeBtn.className = "small-btn";
     removeBtn.textContent = "x";
     removeBtn.addEventListener("click", async () => {
       await supabaseRequest({
