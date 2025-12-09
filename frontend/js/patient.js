@@ -168,7 +168,8 @@ async function init() {
       questionnaireForm.reset();
     });
   }
-    if (surveySaveBtn) {
+  if (surveySaveBtn) {
+    console.log("Wiring surveySaveBtn click");
     surveySaveBtn.addEventListener("click", saveMedicationSurvey);
   }
 }
@@ -470,6 +471,7 @@ async function openMedicationSurvey(info) {
 }
 
 async function saveMedicationSurvey() {
+  console.log("saveMedicationSurvey() called"); 
   if (!currentMedicationForSurvey) return;
 
   const token = getAccessToken();
