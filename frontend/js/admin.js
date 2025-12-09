@@ -1,5 +1,11 @@
 // Everett Miceli
-// Admin page modified from doctor.js
+/*
+  admin.js     Virginia Tech      Sprint 1,2,3
+  Admin page modified from doctor.js that allows for management of user accunts and role assignment
+
+  Allows administrators to delete user accounts, reassign roles, view email, userid, and name for recovery purposes
+  Also allows for ability to act as any role (patient or doctor) for development purposes
+*/
 const logoutBtn = document.getElementById('logoutBtn');
 const headerRole = document.getElementById('headerRole');
 const myPatientsList = document.getElementById('myPatientsList');
