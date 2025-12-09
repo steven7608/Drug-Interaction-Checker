@@ -1,0 +1,68 @@
+<!-- 
+  reminders.html   Virginia Tech      Sprint 3
+  Rahul Palani & Everett Miceli
+  Patient reminders page
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Reminders</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<div class="topbar">
+  <div class="role" id="headerRole"></div>
+  <button class="tab" onclick="window.location.href='patient.html'">Dashboard</button>
+  <button class="tab active" onclick="window.location.href='reminders.html'">Reminders</button>
+  <button id="logoutBtn" class="logout-btn">Logout</button>
+  <!-- ^^ Top bar -->
+
+</div>
+
+<div class="page">
+  <div class="panel">
+    <h3>Add Reminder</h3>
+    <form id="reminderForm">
+      <label>Medication</label>
+      <input type="text" id="rem_medication" placeholder="Metformin 500mg" required>
+
+      <label>Frequency</label>
+      <select id="rem_frequency">
+        <option value="once_daily">Once Daily</option>
+        <option value="twice_daily">Twice Daily</option>
+        <option value="three_times_daily">Three Times Daily</option>
+        <option value="every_8_hours">Every 8 Hours</option>
+        <option value="weekly">Weekly</option>
+      </select>
+
+      <label>Times (comma-separated, 24hr)</label>
+      <input type="text" id="rem_times" placeholder="08:00, 20:00">
+
+      <label>With Meal?</label>
+      <select id="rem_with_meal">
+        <option value="false">No</option>
+        <option value="true">Yes</option>
+      </select>
+
+      <label>Notes</label>
+      <input type="text" id="rem_notes" placeholder="Optional">
+
+      <button type="button" id="setReminderBtn">Set reminder</button>
+    </form>
+  </div>
+
+  <div class="panel" id="listPanel">
+    <h3>Your Reminders</h3>
+    <ul id="reminderList" class="list"></ul>
+  </div>
+</div>
+
+<script src="js/supabase.js"></script>
+<script src="js/logo.js"></script> <!-- loads logo/home button icon in top left-->
+<script src="js/reminders.js"></script>
+</body>
+</html>
+
+
