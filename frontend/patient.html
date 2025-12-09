@@ -29,7 +29,24 @@
     <ul id="rxList" class="list"></ul>
   </div>
 
-  <!-- Reminders Panel -->
+  <!-- Medication Survey Panel (new) -->
+    <!-- Sprint 3, Eitan Pupkin -->
+  <div class="panel" id="medSurveyPanel" style="display:none;">
+    <h3>Medication Survey</h3>
+    <div id="medSurveyMedicationLabel" class="muted"></div>
+
+    <label for="surveyAdherence">Are you taking this as prescribed? (1–5)</label>
+    <input type="number" id="surveyAdherence" min="1" max="5">
+
+    <label for="surveyEffectiveness">How well is it working for you? (1–5)</label>
+    <input type="number" id="surveyEffectiveness" min="1" max="5">
+
+    <label for="surveySideEffects">Any side effects?</label>
+    <input type="text" id="surveySideEffects">
+
+    <button id="surveySaveBtn" type="button">Save Survey</button>
+  </div>
+ <!-- Reminders Panel -->
 <div class="panel">
   <h3>Your Medication Reminders</h3>
 
@@ -65,8 +82,7 @@
     <button type="submit">Add Reminder</button>
   </form>
 </div>
-
-
+  <!-- Sprint 3, Steven An -->
   <!-- Questionnaire Panel -->
   <div class="panel">
     <h3>Health Questionnaire</h3>

@@ -536,7 +536,7 @@ async function onSavePrescription() {
   await loadPrescriptions();
 }
 
-// Sprint 3, Steven An
+// Sprint 3, Steven An, Eitan Pupkin
 // --------- Questionnaire responses ----------
 async function loadQuestionnaires() {
   if (!selectedPatient) return;
@@ -554,16 +554,32 @@ async function loadQuestionnaires() {
   qList.innerHTML = "";
 
   (rows || []).forEach(r => {
+    const a  = r.answers || {};
     const li = document.createElement("li");
-    li.innerHTML = `
-      <div><strong>${new Date(r.created_at).toLocaleString()}</strong></div>
-      <div>Allergies: ${r.answers?.allergies || "N/A"}</div>
-      <div>Symptoms: ${r.answers?.symptoms || "N/A"}</div>
-      <div>OTC meds: ${r.answers?.otc || "N/A"}</div>
-    `;
+
+    if (a.type === "medication_survey") {
+      // Medication survey view
+      li.innerHTML = `
+        <div><strong>${new Date(r.created_at).toLocaleString()}</strong></div>
+        <div>Medication: ${a.medication_name || ("#" + a.medicationid)}</div>
+        <div>Adherence: ${a.adherence ?? "N/A"}</div>
+        <div>Effectiveness: ${a.effectiveness ?? "N/A"}</div>
+        <div>Side effects: ${a.side_effects || "None reported"}</div>
+      `;
+    } else {
+      // Original health questionnaire
+      li.innerHTML = `
+        <div><strong>${new Date(r.created_at).toLocaleString()}</strong></div>
+        <div>Allergies: ${a.allergies || "N/A"}</div>
+        <div>Symptoms: ${a.symptoms || "N/A"}</div>
+        <div>OTC meds: ${a.otc || "N/A"}</div>
+      `;
+    }
+
     qList.appendChild(li);
   });
 }
+
 
 // Sprint 2, Steven An
 // Allows Doctor to check for drug interactions using openFDA API

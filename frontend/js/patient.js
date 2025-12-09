@@ -10,7 +10,16 @@ const logoutBtn  = document.getElementById('logoutBtn');
 const headerRole = document.getElementById('headerRole');
 const doctorInfo = document.getElementById('doctorInfo');
 const rxList     = document.getElementById('rxList');
+// Medication survey state + elements Eitan Pupkin sprint 3
+let currentMedicationForSurvey = null;   // { medicationId, medicationName, userid }
+let currentMedicationSurveyId  = null;   // existing questionnaire_responses.id for this month (if any)
 
+const medSurveyPanel           = document.getElementById("medSurveyPanel");
+const medSurveyMedicationLabel = document.getElementById("medSurveyMedicationLabel");
+const surveyAdherence          = document.getElementById("surveyAdherence");
+const surveyEffectiveness      = document.getElementById("surveyEffectiveness");
+const surveySideEffects        = document.getElementById("surveySideEffects");
+const surveySaveBtn            = document.getElementById("surveySaveBtn");
 init();
 
 async function init() {
@@ -84,6 +93,7 @@ async function init() {
     query: `?select=medicationid,dosage_mg,form,notes,start_date,end_date&userid=eq.${encodeURIComponent(me.userid)}&order=id.desc`
   });
 
+  //updated by Eitan Pupkin sprint 3
   rxList.innerHTML = '';
   (rx || []).forEach(r => {
     const li = document.createElement('li');
@@ -112,6 +122,21 @@ async function init() {
       li.appendChild(d);
     });
     li.appendChild(notes);
+
+    // NEW: Survey button for this medication
+    const surveyBtn = document.createElement('button');
+    surveyBtn.className = 'small-btn';
+    surveyBtn.type = 'button';
+    surveyBtn.textContent = 'Survey';
+    surveyBtn.addEventListener('click', () => {
+      openMedicationSurvey({
+        medicationId: r.medicationid,
+        medicationName: name,
+        userid: me.userid
+      });
+    });
+    li.appendChild(surveyBtn);
+
     rxList.appendChild(li);
   });
 
@@ -142,6 +167,9 @@ async function init() {
       alert("Your responses have been submitted.");
       questionnaireForm.reset();
     });
+  }
+    if (surveySaveBtn) {
+    surveySaveBtn.addEventListener("click", saveMedicationSurvey);
   }
 }
 
@@ -386,4 +414,109 @@ async function loadPatientInteractionWarnings(patientUserId) {
       </p>
     `;
   }
+}
+//helper functions for surveys Eitan Pupkin
+async function openMedicationSurvey(info) {
+  currentMedicationForSurvey = info;
+  currentMedicationSurveyId = null; // reset
+
+  if (medSurveyPanel) {
+    medSurveyPanel.style.display = 'block';
+  }
+  if (medSurveyMedicationLabel) {
+    medSurveyMedicationLabel.textContent = `Medication: ${info.medicationName}`;
+  }
+
+  // Clear fields
+  if (surveyAdherence)     surveyAdherence.value = '';
+  if (surveyEffectiveness) surveyEffectiveness.value = '';
+  if (surveySideEffects)   surveySideEffects.value = '';
+
+  // Load this-month survey (if exists)
+  const token = getAccessToken();
+  const rows = await supabaseRequest({
+    method: "GET",
+    path: "questionnaire_responses",
+    accessToken: token,
+    query: `?select=id,answers,created_at&patient_userid=eq.${encodeURIComponent(info.userid)}&order=created_at.desc`
+  });
+
+  const now = new Date();
+  const thisYear  = now.getFullYear();
+  const thisMonth = now.getMonth(); // 0-11
+
+  let latestThisMonth = null;
+
+  (rows || []).forEach(r => {
+    const a = r.answers || {};
+    if (a.type !== "medication_survey") return;
+    if (a.medicationid !== info.medicationId) return;
+
+    const d = new Date(r.created_at);
+    if (d.getFullYear() === thisYear && d.getMonth() === thisMonth) {
+      if (!latestThisMonth || d > new Date(latestThisMonth.created_at)) {
+        latestThisMonth = r;
+      }
+    }
+  });
+
+  if (latestThisMonth) {
+    currentMedicationSurveyId = latestThisMonth.id;
+    const a = latestThisMonth.answers || {};
+    if (surveyAdherence)     surveyAdherence.value     = a.adherence ?? '';
+    if (surveyEffectiveness) surveyEffectiveness.value = a.effectiveness ?? '';
+    if (surveySideEffects)   surveySideEffects.value   = a.side_effects ?? '';
+  }
+}
+
+async function saveMedicationSurvey() {
+  if (!currentMedicationForSurvey) return;
+
+  const token = getAccessToken();
+
+  const adherence = surveyAdherence && surveyAdherence.value
+    ? parseInt(surveyAdherence.value, 10)
+    : null;
+  const effectiveness = surveyEffectiveness && surveyEffectiveness.value
+    ? parseInt(surveyEffectiveness.value, 10)
+    : null;
+  const sideEffects = surveySideEffects && surveySideEffects.value
+    ? surveySideEffects.value.trim()
+    : null;
+
+  const answers = {
+    type: "medication_survey",
+    medicationid:   currentMedicationForSurvey.medicationId,
+    medication_name: currentMedicationForSurvey.medicationName,
+    adherence,
+    effectiveness,
+    side_effects: sideEffects
+  };
+
+  if (currentMedicationSurveyId) {
+    // Update existing this-month survey
+    await supabaseRequest({
+      method: "PATCH",
+      path: "questionnaire_responses",
+      accessToken: token,
+      query: `?id=eq.${encodeURIComponent(currentMedicationSurveyId)}`,
+      body: {
+        answers: answers,
+        created_at: new Date().toISOString()
+      }
+    });
+  } else {
+    // Create new survey for this month
+    await supabaseRequest({
+      method: "POST",
+      path: "questionnaire_responses",
+      accessToken: token,
+      body: [{
+        patient_userid: currentMedicationForSurvey.userid,
+        answers: answers
+      }]
+    });
+  }
+
+  alert("Medication survey saved for this month.");
 }
