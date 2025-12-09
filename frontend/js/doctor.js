@@ -1,4 +1,14 @@
-// --------- Helpers for FDA interaction UI ----------
+/*
+  doctor.js     Virginia Tech      Sprint 1,2,3
+  Doctor portal, this file handle all doctor-related frontend logic and UI
+
+  Allows doctors to assign patients, view patient details, add notes, and prescribe medications.
+  Also includes FDA drug interaction checking functionality (making sure two drugs do not have harmful interactions), 
+  and questionnaire response viewing
+*/
+
+// Sprint 2, Steven An
+// Helpers functions for FDA interaction UI 
 function truncate(text, maxLength = 150) {
   if (!text) return "";
   if (text.length <= maxLength) return text;
@@ -21,7 +31,7 @@ function toggleInteraction(btn) {
   }
 }
 
-// --------- DOM elements ----------
+//  DOM elements 
 const logoutBtn       = document.getElementById("logoutBtn");
 const headerRole      = document.getElementById("headerRole");
 const unassignedList  = document.getElementById("unassignedList");
@@ -54,7 +64,7 @@ let selectedPatient = null;
 let myPatients      = [];
 let medicationsById = {};
 
-// --------- Init ----------
+//  Init 
 init();
 
 async function init() {
@@ -123,7 +133,7 @@ async function init() {
   await refreshLists();
 }
 
-// --------- Patient list / assignments ----------
+//  Patient list / assignments 
 async function refreshLists() {
   const token = getAccessToken();
 
@@ -245,7 +255,7 @@ async function unassignPatient(patientUserId) {
   await refreshLists();
 }
 
-// --------- Patient details ----------
+//  Patient details 
 function clearDetails() {
   if (detailTitle) {
     detailTitle.textContent = "Patient Details";
@@ -289,7 +299,8 @@ async function openPatient(patient) {
   } catch (_) {}
 }
 
-// --------- Notes (with delete) ----------
+// Sprint 2, Steven An
+//  Notes (with delete) 
 async function loadNotes() {
   if (!notesList || !selectedPatient) return;
   notesList.innerHTML = "";
@@ -389,7 +400,8 @@ async function onAddNote() {
   await loadNotes();
 }
 
-// --------- Prescriptions (free-text medication name) ----------
+// Sprint 2, Steven An
+//  Prescriptions (free-text medication name) 
 async function loadPrescriptions() {
   if (!rxList || !selectedPatient) return;
   rxList.innerHTML = "";
@@ -524,6 +536,7 @@ async function onSavePrescription() {
   await loadPrescriptions();
 }
 
+// Sprint 3, Steven An
 // --------- Questionnaire responses ----------
 async function loadQuestionnaires() {
   if (!selectedPatient) return;
@@ -552,12 +565,12 @@ async function loadQuestionnaires() {
   });
 }
 
+// Sprint 2, Steven An
+// Allows Doctor to check for drug interactions using openFDA API
 // --------- FDA Drug Interaction Checker ----------
 async function handleInteractionCheck() {
-  const medsInput = document.getElementById("interactionInput");
+  const medsInput  = document.getElementById("interactionInput");
   const resultsDiv = document.getElementById("interactionResults");
-
-  if (!medsInput || !resultsDiv) return;
 
   const meds = medsInput.value.trim();
   if (!meds) {
@@ -565,10 +578,51 @@ async function handleInteractionCheck() {
     return;
   }
 
+  const list = meds.split(",").map(x => x.trim()).filter(Boolean);
   resultsDiv.innerHTML = "<p>Checking...</p>";
 
   const data = await checkFDAInteractions(meds);
 
+  // Single-drug behavior (now with fallback to warnings) 
+  if (list.length === 1) {
+    const medName = list[0];
+    const info = data.results && data.results[medName];
+
+    const interactions  = (info && info.interactions)   || [];
+    const fallbackTexts = (info && info.fallbackTexts)  || [];
+
+    // Prefer drug_interactions if present; otherwise use fallback warning text
+    let labelTexts = interactions.length ? interactions : fallbackTexts;
+
+    if (!labelTexts.length) {
+      resultsDiv.innerHTML = `
+        <p>No interaction or warning information was found in the FDA label fields we checked for this medication.</p>
+      `;
+      return;
+    }
+
+    let html = `<h4>FDA label information for ${medName}</h4>`;
+
+    labelTexts.forEach(txt => {
+      const shortText = truncate(txt, 150);
+      const fullText  = txt.replace(/\n/g, "<br>");
+
+      html += `
+        <div class="interaction-item">
+          <p>
+            <span class="short-text">${shortText}</span>
+            <span class="full-text" style="display:none;">${fullText}</span>
+          </p>
+          <button class="toggle-btn" onclick="toggleInteraction(this)">Show More</button>
+        </div>
+      `;
+    });
+
+    resultsDiv.innerHTML = html;
+    return; // don't run multi-drug logic
+  }
+
+  // Existing multi-drug behavior 
   if (!data.interactionPairs.length) {
     resultsDiv.innerHTML = "<p>No cross-interactions detected.</p>";
     return;
@@ -595,6 +649,8 @@ async function handleInteractionCheck() {
   resultsDiv.innerHTML = html;
 }
 
+// Sprint 2, Steven An
+// FDA Drug Interaction Checker 
 async function checkFDAInteractions(meds) {
   const list = meds.split(",").map(x => x.trim()).filter(Boolean);
   const results = {};
@@ -607,20 +663,47 @@ async function checkFDAInteractions(meds) {
       const res = await fetch(url);
       const data = await res.json();
 
-      if (!data.results) {
-        results[med] = { error: "No data found" };
+      if (!data.results || !data.results[0]) {
+        results[med] = { error: "No data found", interactions: [], fallbackTexts: [] };
         continue;
       }
 
       const info = data.results[0];
+
+      // Primary interaction field (what you were using before)
+      const interactions = info.drug_interactions || [];
+
+      // Fallback: pull extra warning-related fields if needed
+      const fallbackTexts = [];
+      function addField(fieldName) {
+        const val = info[fieldName];
+        if (!val) return;
+        if (Array.isArray(val)) {
+          val.forEach(v => {
+            if (typeof v === "string") fallbackTexts.push(v);
+          });
+        } else if (typeof val === "string") {
+          fallbackTexts.push(val);
+        }
+      }
+
+      // These are common places where ibuprofen / NSAID warnings live
+      addField("warnings_and_cautions");
+      addField("warnings");
+      addField("boxed_warning");
+      addField("precautions");
+      addField("contraindications");
+
       results[med] = {
-        interactions: info.drug_interactions || []
+        interactions: interactions,
+        fallbackTexts: fallbackTexts
       };
     } catch (err) {
-      results[med] = { error: err.message };
+      results[med] = { error: err.message, interactions: [], fallbackTexts: [] };
     }
   }
 
+  // Build interaction pairs (unchanged logic)
   for (const m1 of list) {
     for (const m2 of list) {
       if (m1 === m2) continue;

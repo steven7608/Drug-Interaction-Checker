@@ -1,4 +1,4 @@
-//Everett Miceli
+// Everett Miceli
 // Admin page modified from doctor.js
 const logoutBtn = document.getElementById('logoutBtn');
 const headerRole = document.getElementById('headerRole');

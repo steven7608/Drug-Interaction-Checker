@@ -1,3 +1,9 @@
+/*
+    styles.css     Virginia Tech      Sprint 1,2,3
+    Main CSS stylesheet for the Drug Interaction Checker frontend.
+    Provides global styles, layout, and component styling for a clean and consistent UI.
+*/
+
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap');
 
 /* Global Reset */
@@ -170,6 +176,7 @@ button.secondary:hover {
     .grid { grid-template-columns: 1fr; }
 }
 
+/* Sprint 2, Steven An */
 /* Interaction Checker Box */
 .interaction-panel {
   margin-top: 10px;
@@ -179,6 +186,7 @@ button.secondary:hover {
   white-space: normal;
 }
 
+/* Sprint 3, Steven An */
 /* Individual interaction items */
 .interaction-item {
   border-bottom: 1px dashed #999;
@@ -186,6 +194,7 @@ button.secondary:hover {
   margin-bottom: 10px;
 }
 
+/* Sprint 2, Steven An */
 /* Show More button */
 .toggle-btn {
   margin-top: 5px;

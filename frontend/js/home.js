@@ -1,3 +1,10 @@
+/*
+    home.js   Virginia Tech       Sprint 1,2,3
+    Main landing page with login form and redirection based on role assignment
+
+    Home page that allows user logins and redirects based on role- doctor, administrator, patient
+*/
+
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const email = document.getElementById("email").value.trim();
