@@ -35,7 +35,7 @@
       if (headerRole) headerRole.textContent = 'Patient: ' + email;
     }
     if (setReminderBtn) setReminderBtn.addEventListener('click', onSave);
-    await loadAndRender();
+    await loadReminders();
   });
   async function onSave() {
     if (!userId) return;

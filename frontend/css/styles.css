@@ -273,6 +273,12 @@ button.secondary:hover {
 .remove-btn:hover {
     background: #ff6e6e;
 }
+/* Override for all "danger" button coloring */
+button.danger-btn,
+button.remove-btn {
+    color: #b00020 !important;
+    border-color: #b00020 !important;
+}
 
 /* Everett Miceli Alignment changes for doctor page medication fields */
 #prescriptionForm .row > label {
