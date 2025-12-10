@@ -49,6 +49,7 @@ async function init() {
   const me = users[0];
   headerRole.textContent = `Patient: ${me.fullname || email}`;
 
+  // Sprint 3, Steven An
   // Medication Safety Warnings based on patient's prescriptions
   await loadPatientInteractionWarnings(me.userid);
 
@@ -123,7 +124,7 @@ async function init() {
     });
     li.appendChild(notes);
 
-    // NEW: Survey button for this medication
+    // Survey button for this medication
     const surveyBtn = document.createElement('button');
     surveyBtn.className = 'small-btn';
     surveyBtn.type = 'button';
@@ -176,7 +177,7 @@ async function init() {
 
 // Sprint 3,Steven An 
 // Summarize the long FDA label text into a short patient-friendly warning
-/* ===== Medication Safety Warnings    ===== */
+// Medication Safety Warnings based on FDA data
 function summarizeInteractionText(raw, medName) {
   if (!raw) return null;
 
